@@ -1,155 +1,143 @@
-// Program to find maximum sum subarray in a given 2D array
 #include <stdio.h>
 #include <string.h>
 #include <limits.h>
 #include <stdlib.h>
 #include <stdbool.h>
-//#define ROW 4
-//#define COL 4
+
 int TAM = 0;
  
-// Implementation of Kadane's algorithm for 1D array. The function 
-// returns the maximum sum and stores starting and ending indexes of the 
-// maximum sum subarray at addresses pointed by start and finish pointers 
-// respectively.
-int kadane(int* arr, int* start, int* finish, int n)
+//Cria subArrays sobre a matrix e comparando os valores somados para
+//tamanhos diferentes, retornando o maior valor encontrado.
+int maiorSubArray(int* array, int* inicio, int* fim, int TAM)
 {
-    // initialize sum, maxSum and
-    int sum = 0, maxSum = INT_MIN, i;
+    // valores utilizados:
+    int soma = 0, maiorValor = INT_MIN, i;
  
-    // Just some initial value to check for all negative values case
-    *finish = -1;
+    // checa os valores negativos caso ouver
+    *fim = -1;
  
-    // local variable
-    int local_start = 0;
+    // uma uma variavel "temporaria" para o inicio da posicao do contador:
+    int inicio_temp = 0;
  
-    for (i = 0; i < n; ++i)
+    for (i = 0; i < TAM; ++i)
     {
-        sum += arr[i];
-        if (sum < 0)
+        soma += array[i];
+        if (soma < 0)
         {
-            sum = 0;
-            local_start = i+1;
+            soma = 0;
+            inicio_temp = i+1;
         }
-        else if (sum > maxSum)
+        else if (soma > maiorValor)
         {
-            maxSum = sum;
-            *start = local_start;
-            *finish = i;
+            maiorValor = soma;
+            *inicio = inicio_temp;
+            *fim = i;
         }
     }
+
+    if (*fim != -1)
+        return maiorValor;
  
-     // There is at-least one non-negative number
-    if (*finish != -1)
-        return maxSum;
+    maiorValor = array[0];
+    *inicio = *fim = 0;
  
-    // Special Case: When all numbers in arr[] are negative
-    maxSum = arr[0];
-    *start = *finish = 0;
- 
-    // Find the maximum element in array
-    for (i = 1; i < n; i++)
+    // ACha o maior valor no Array:
+    for (i = 1; i < TAM; i++)
     {
-        if (arr[i] > maxSum)
+        if (array[i] > maiorValor)
         {
-            maxSum = arr[i];
-            *start = *finish = i;
+            maiorValor = array[i];
+            *inicio = *fim = i;
         }
     }
-    return maxSum;
+    return maiorValor;
 }
  
-// The main function that finds maximum sum rectangle in M[][]
-void findMaxSum(int **mat1)
+void acharMaiorValor(int **matrix)
 {
-    // Variables to store the final output
-    int maxSum = INT_MIN, finalLeft, finalRight, finalTop, finalBottom;
+    int maiorValor = INT_MIN;
  
-    int left, right, i;
-    int temp[TAM], sum, start, finish;
+    int esq, dir, i;
+    int temp[TAM], soma, inicio, fim;
  
-    // Set the left column
-    for (left = 0; left < TAM; ++left)
+    // Cria a coluna da esquerda
+    for (esq = 0; esq < TAM; ++esq)
     {
-        // Initialize all elements of temp as 0
+        // Coloca todos os elemntos de "temp" como '0'
         memset(temp, 0, sizeof(temp));
  
-        // Set the right column for the left column set by outer loop
-        for (right = left; right < TAM; ++right)
+ 		//Cria os retangulos passandos por parametro para o metodo "maiorSubArray":
+        for (dir = esq; dir < TAM; ++dir)
         {
-           // Calculate sum between current left and right for every row 'i'
             for (i = 0; i < TAM; ++i)
-                temp[i] += mat1[i][right];
- 
-            // Find the maximum sum subarray in temp[]. The kadane() 
-            // function also sets values of start and finish.  So 'sum' is 
-            // sum of rectangle between (start, left) and (finish, right) 
-            //  which is the maximum sum with boundary columns strictly as
-            //  left and right.
-            sum = kadane(temp, &start, &finish, TAM);
- 
-            // Compare sum with maximum sum so far. If sum is more, then 
-            // update maxSum and other output values
-            if (sum > maxSum)
-            {
-                maxSum = sum;
-                finalLeft = left;
-                finalRight = right;
-                finalTop = start;
-                finalBottom = finish;
-            }
+				temp[i] += matrix[i][dir];
+
+				// Manda o array de "temp" com os valores da dimensao do retangulo e no metodo
+				// "maiorSubArray" calcula qual o maior valor dentro do retangulo que começa em "inicio" e termina em "fim":
+				soma = maiorSubArray(temp, &inicio, &fim, TAM);
+
+				//Apos o metodo acima, compara o valor de volta (maiorValor) com o ja presente:
+				if (soma > maiorValor)
+				{
+					maiorValor = soma;
+
+				}
         }
     }
  
-    // Print final values
-    printf("(Top, Left) (%d, %d)\n", finalTop, finalLeft);
-    printf("(Bottom, Right) (%d, %d)\n", finalBottom, finalRight);
-    printf("Max sum is: %d\n", maxSum);
+    // Mostra na tela o maior valor
+    printf("%d\n", maiorValor);
 }
  
-// Driver program to test above functions
-int main()
+
+int main(int argc, char *argv[])
 {
-    /*
-    int M[ROW][COL] = {{1, 2, -1, -4, -20},
-                       {-8, -3, 4, 2, 1},
-                       {3, 8, 10, 1, 3},
-                       {-4, -1, 1, 7, -6}
-                      };
-    */
-	FILE* file = fopen ("1234", "r");
+	//Le um "file", no caso com o nome de "entrada":
+	//FILE* file = fopen ("Testes", "r");
+
+	//Le um file generico de entrada:
+	//FILE* file = fopen(argv[1], "r");
 
 	int i = 0;
-	//int TAM = 0;
 	int linha = 0;
 	int coluna = 0;
 
-	fscanf(file, "%d", &TAM);
+	//Pega o tamanho da matrix:
+	//fscanf(file, "%d", &TAM);
+	
+	//printf("%d\n", TAM);
 
-    int **mat1 = (int **)malloc(TAM * sizeof(int*));
-    for(i = 0; i < TAM; i++)
-        mat1[i] = (int *)malloc(TAM * sizeof(int));
+	//Aloca na memória o tamanho da matrix:
 
-	while (!feof (file))
+
+    int valor_while = 3;
+	while (scanf("%d", &TAM) != -1)
 	{  
-		//printf ("%d ", i);
+		int **matrix = (int **)malloc(TAM * sizeof(int*));
+			for(i = 0; i < TAM; i++)
+				matrix[i] = (int *)malloc(TAM * sizeof(int));
+
 		for(linha=0; linha < TAM; linha++)
 		{
 			for(coluna=0; coluna < TAM; coluna++){
-				fscanf(file,"%d",&mat1[linha][coluna]);
-				printf("Posicao: %d%d %d\n", linha,coluna,mat1[linha][coluna]);
+				//fscanf(file,"%d",&matrix[linha][coluna]);
+				scanf("%d",&matrix[linha][coluna]);
+				//Mostrar a matrix montada:
+				//printf("Posicao: %d%d %d\n", linha,coluna,matrix[linha][coluna]);
 			}
 		}
-		//fscanf (file, "%d\n", &i);      
+		acharMaiorValor(matrix);
+		//scanf("%d", &TAM);
+		valor_while = valor_while-1;
+		//TAM = TAM-1;    
 	}
-	fclose (file);
+	//fclose (file);
 
-    int M[4][4] = {{0, -2, -7, 0}, {9, 2, -6, 2}, {-4, 1, -4, 1}, {-1, 8, 0, -2}};
+	//Testes para verificar dados corretos (TAM, linha e coluna):
     //printf("%d\n", TAM);
     //printf("%d\n", linha);
     //printf("%d\n", coluna);
-    findMaxSum(mat1);
-    //findMaxSum(M);
+    //acharMaiorValor(matrix);
  
     return 0;
 }
